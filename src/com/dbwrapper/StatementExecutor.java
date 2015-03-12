@@ -24,7 +24,7 @@ public class StatementExecutor {
 	Logger logger = LoggerFactory.getLogger(StatementExecutor.class);
 
 	@GET
-	@Path("/getPopulation/{slow}")
+	@Path("/population/{slow}")
 	@Produces(MediaType.TEXT_HTML)
 	public String executeSelectQuery(@PathParam("slow") boolean flag) {
 
@@ -42,7 +42,7 @@ public class StatementExecutor {
 	}
 
 	@GET
-	@Path("/getJoin/{slow}")
+	@Path("/join/{slow}")
 	@Produces(MediaType.TEXT_HTML)
 	public String executeCartesianQuery(@PathParam("slow") boolean flag) {
 
@@ -59,6 +59,69 @@ public class StatementExecutor {
 		return "<html> " + "<title>" + "Executed join query" + "</title>"
 				+ "<body><h1>" + "The number of rows retrieved is: "
 				+ return_value + "</h1></body>" + "</html> ";
+	}
+
+	@GET
+	@Path("/inclause/{slow}")
+	@Produces(MediaType.TEXT_HTML)
+	public String executeInClauseQuery(@PathParam("slow") boolean flag) {
+
+		queryString = "select c.name, cl.language from country c, countrylanguage cl "
+				+ "where c.code = cl.countrycode and cl.language in ('Spanish', 'Portuguese');";
+
+		return_value = executeQuery(queryString);
+
+		return "<html> " + "<title>" + "Executed in clause query" + "</title>"
+				+ "<body><h1>" + "The number of rows retrieved is: "
+				+ return_value + "</h1></body>" + "</html> ";
+	}
+
+	@GET
+	@Path("/simplesubquery/{slow}")
+	@Produces(MediaType.TEXT_HTML)
+	public String executeSimpleSubquery(@PathParam("slow") boolean flag) {
+
+		queryString = "select * from city where countrycode in "
+				+ "(select code from country where gnp > 1350000) "
+				+ "order by population desc limit 10";
+
+		slowQueryString = "select country_name, city_name, city_pop, "
+				+ "(city_pop/total_pop)*100 as perc_of_country"
+				+ "from (select c.name as country_name, ci.name as city_name, ci.population"
+				+ "as city_pop, (select max(surfacearea) from country) as total_pop"
+				+ "from city ci, country c where ci.countrycode = c.code"
+				+ "and c.surfacearea = (select max(surfacearea) from country)) as subQ"
+				+ "order by city_pop desc;";
+
+		if (flag) {
+			return_value = executeQuery(queryString);
+		} else {
+			return_value = executeQuery(slowQueryString);
+		}
+		return "<html> " + "<title>" + "Executed simple subquery" + "</title>"
+				+ "<body><h1>" + "The number of rows retrieved is: "
+				+ return_value + "</h1></body>" + "</html> ";
+	}
+
+	@GET
+	@Path("/indexrange/{slow}")
+	@Produces(MediaType.TEXT_HTML)
+	public String executeIndexRangeQuery(@PathParam("slow") boolean flag) {
+
+		queryString = "select distinct state from zips where lng between -70 ad -65;";
+		slowQueryString = "select distinct state from zips where lng between -170 and -65;";
+		System.out.println(flag);
+
+		if (flag) {
+			return_value = executeQuery(slowQueryString);
+		} else {
+			return_value = executeQuery(queryString);
+		}
+
+		return "<html> " + "<title>" + "Executed index range query"
+				+ "</title>" + "<body><h1>"
+				+ "The number of rows retrieved is: " + return_value
+				+ "</h1></body>" + "</html> ";
 	}
 
 	protected Integer executeQuery(String query) {
