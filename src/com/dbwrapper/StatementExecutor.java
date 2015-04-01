@@ -22,7 +22,26 @@ public class StatementExecutor {
 	String queryString = null;
 	String slowQueryString = null;
 	Logger logger = LoggerFactory.getLogger(StatementExecutor.class);
-
+	MainController controller = new MainController();
+	
+	@GET
+	@Path("/test/{slow}")
+	@Produces(MediaType.TEXT_HTML)
+	public String testMethod(@PathParam("slow") boolean flag){
+		if(flag){
+			System.out.println("true");
+			return_value = 1;
+		}
+		else{
+			System.out.println("false");
+			return_value = 0;
+		}
+		
+		return "<html> " + "<title>" + "Hello Jersey" + "</title>"
+		+ "<body><h1>" + "The number of rows retrieved is: "
+		+ return_value + "</h1></body>" + "</html> ";
+	}
+	
 	@GET
 	@Path("/population/{slow}")
 	@Produces(MediaType.TEXT_HTML)
@@ -30,7 +49,6 @@ public class StatementExecutor {
 
 		queryString = "select state, sum(pop) from zips group by state;";
 		slowQueryString = "select * from zips where upper(city) = 'SPRINGFIELD';";
-		System.out.println(flag);
 		if (flag) {
 			return_value = executeQuery(slowQueryString);
 		} else {
@@ -49,10 +67,10 @@ public class StatementExecutor {
 		queryString = "select c.name, cl.language from country c, countrylanguage cl "
 				+ "where c.code = cl.countrycode and c.name = 'Spain';";
 		slowQueryString = "select c.name, cl.language from country c, countrylanguage cl where c.name = 'Spain';";
-		System.out.println(flag);
 		// checks if the slow query flag is set and
 		if (flag) {
 			return_value = executeQuery(slowQueryString);
+			
 		} else {
 			return_value = executeQuery(queryString);
 		}
@@ -85,13 +103,14 @@ public class StatementExecutor {
 				+ "(select code from country where gnp > 1350000) "
 				+ "order by population desc limit 10";
 
-		slowQueryString = "select country_name, city_name, city_pop, "
-				+ "(city_pop/total_pop)*100 as perc_of_country"
-				+ "from (select c.name as country_name, ci.name as city_name, ci.population"
-				+ "as city_pop, (select max(surfacearea) from country) as total_pop"
-				+ "from city ci, country c where ci.countrycode = c.code"
-				+ "and c.surfacearea = (select max(surfacearea) from country)) as subQ"
-				+ "order by city_pop desc;";
+		slowQueryString = "select country_name, city_name, city_pop, (city_pop/total_pop)*100 as perc_of_country "
+				+ "from (select c.name as country_name, ci.name as city_name,"
+				+ " ci.population as city_pop, "
+				+ "(select max(surfacearea) from country) as "
+				+ "total_pop from city ci, country c where "
+				+ "ci.countrycode = c.code and c.surfacearea = "
+				+ "(select max(surfacearea) from country)) "
+				+ "as subQ order by city_pop desc;";
 
 		if (flag) {
 			return_value = executeQuery(queryString);
@@ -110,7 +129,6 @@ public class StatementExecutor {
 
 		queryString = "select distinct state from zips where lng between -70 ad -65;";
 		slowQueryString = "select distinct state from zips where lng between -170 and -65;";
-		System.out.println(flag);
 
 		if (flag) {
 			return_value = executeQuery(slowQueryString);
@@ -130,7 +148,9 @@ public class StatementExecutor {
 		Integer rsLength = 10;
 		try {
 			// create connection with database
-			conn = MainController.createConnection();
+			controller.setDBProperties("mysql");
+			
+			conn = controller.establishConnection();
 			// creates statement with the open connection
 			stmt = conn.createStatement();
 			// get the result set of the executed query
@@ -143,7 +163,6 @@ public class StatementExecutor {
 			}
 
 			logger.info(rsLength.toString());
-			System.out.println(rsLength);
 
 		} catch (SQLException e) {
 			e.printStackTrace();
