@@ -21,7 +21,7 @@ public class StatementExecutor {
 	int return_value;
 	String queryString = null;
 	String slowQueryString = null;
-	Logger logger = LoggerFactory.getLogger(StatementExecutor.class);
+	private static final Logger logger = LoggerFactory.getLogger(StatementExecutor.class);
 	MainController controller = new MainController();
 	
 	@GET
@@ -29,11 +29,11 @@ public class StatementExecutor {
 	@Produces(MediaType.TEXT_HTML)
 	public String testMethod(@PathParam("slow") boolean flag){
 		if(flag){
-			System.out.println("true");
+			logger.info("true");
 			return_value = 1;
 		}
 		else{
-			System.out.println("false");
+			logger.info("false");
 			return_value = 0;
 		}
 		
