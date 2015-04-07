@@ -7,8 +7,12 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MainController {
 
+	private static final Logger logger = LoggerFactory.getLogger(MainController.class);
 	Properties props = new Properties();
 	InputStream input = null;
 	private String dbName, driver, dbUrl, username, password;
@@ -17,23 +21,23 @@ public class MainController {
 	public void setDBProperties(String db) {
 
 		this.dbName = db;
-
 		switch (dbName) {
 		case "oracle":
 
 		case "mysql":
 			try {
-				input = (Thread.currentThread().getContextClassLoader().getResourceAsStream("database.properties"));
-				//input = MainController.class.getResourceAsStream("database.properties");
-				System.out.println(input);
-				
-				props.load(input);
 
+				input = this.getClass().getClassLoader()
+						.getResourceAsStream("/database.properties");
+				
 				this.driver = props.getProperty("mysql.driver");
 				this.dbUrl = props.getProperty("mysql.url");
 				this.username = props.getProperty("mysql.username");
 				this.password = props.getProperty("mysql.password");
 
+				logger.info(this.dbName + " " + this.dbUrl +" "+ this.username +" "+ this.password);
+				props.load(input);
+				
 			} catch (IOException ex) {
 				ex.printStackTrace();
 			} finally {
