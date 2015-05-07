@@ -9,7 +9,7 @@
 	</welcome-file-list>
 
 	<servlet>
-		<servlet-name>welcomeServlet</servlet-name>
+		<servlet-name>StatementExecutor</servlet-name>
 		<servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
@@ -19,7 +19,7 @@
 	</servlet>
 
 	<servlet-mapping>
-		<servlet-name>welcomeServlet</servlet-name>
+		<servlet-name>StatementExecutor</servlet-name>
 		<url-pattern>/query/*</url-pattern>
 	</servlet-mapping>
 </web-app>

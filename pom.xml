@@ -7,6 +7,14 @@
 	<packaging>war</packaging>
 	<description>wrapper providing rest end points for database queries</description>
 	<build>
+		<resources>
+			<resource>
+				<directory>src</directory>
+				<includes>
+					<include>**/*.properties</include>
+				</includes>
+			</resource>
+		</resources>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
@@ -22,7 +30,7 @@
 				<version>2.4</version>
 				<configuration>
 					<warSourceDirectory>WebContent</warSourceDirectory>
-					
+
 					<failOnMissingWebXml>false</failOnMissingWebXml>
 					<warName>dbwrapper</warName>
 				</configuration>
@@ -65,6 +73,12 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.7.5</version>
 		</dependency>
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20140107</version>
+		</dependency>
+
 
 	</dependencies>
 </project>

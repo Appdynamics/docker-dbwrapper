@@ -12,34 +12,44 @@ import org.slf4j.LoggerFactory;
 
 public class MainController {
 
-	private static final Logger logger = LoggerFactory.getLogger(MainController.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(MainController.class);
 	Properties props = new Properties();
 	InputStream input = null;
 	private String dbName, driver, dbUrl, username, password;
 	Connection conn = null;
+	String propFileName = "database.properties";
 
 	public void setDBProperties(String db) {
 
 		this.dbName = db;
 		switch (dbName) {
 		case "oracle":
-
+			try {
+				this.driver = "com.jdbc.driver.OracleDriver";
+				this.dbUrl = "jdbc:oracle:thin:@oracle-db:1521:XE";
+				this.username = "sys as sysdba";
+				this.password = "oracle";
+			} finally {
+				if (input != null) {
+					try {
+						input.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			break;
 		case "mysql":
 			try {
 
-				input = this.getClass().getClassLoader()
-						.getResourceAsStream("/database.properties");
-				
-				this.driver = props.getProperty("mysql.driver");
-				this.dbUrl = props.getProperty("mysql.url");
-				this.username = props.getProperty("mysql.username");
-				this.password = props.getProperty("mysql.password");
+				this.driver = "com.mysql.jdbc.Driver";
+				this.dbUrl = "jdbc:mysql://localhost:3306/test";
+				this.username = "root";
+				this.password = "";
+				logger.info(this.dbName + " " + this.dbUrl + " "
+						+ this.username + " " + this.password);
 
-				logger.info(this.dbName + " " + this.dbUrl +" "+ this.username +" "+ this.password);
-				props.load(input);
-				
-			} catch (IOException ex) {
-				ex.printStackTrace();
 			} finally {
 				if (input != null) {
 					try {

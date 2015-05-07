@@ -11,6 +11,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,50 +19,31 @@ import org.slf4j.LoggerFactory;
 public class StatementExecutor {
 
 	Statement stmt = null;
-	int return_value;
+	JSONArray result;
 	String queryString = null;
 	String slowQueryString = null;
-	private static final Logger logger = LoggerFactory.getLogger(StatementExecutor.class);
+	private static final Logger logger = LoggerFactory
+			.getLogger(StatementExecutor.class);
 	MainController controller = new MainController();
-	
-	@GET
-	@Path("/test/{slow}")
-	@Produces(MediaType.TEXT_HTML)
-	public String testMethod(@PathParam("slow") boolean flag){
-		if(flag){
-			logger.info("true");
-			return_value = 1;
-		}
-		else{
-			logger.info("false");
-			return_value = 0;
-		}
-		
-		return "<html> " + "<title>" + "Hello Jersey" + "</title>"
-		+ "<body><h1>" + "The number of rows retrieved is: "
-		+ return_value + "</h1></body>" + "</html> ";
-	}
-	
+
 	@GET
 	@Path("/population/{slow}")
-	@Produces(MediaType.TEXT_HTML)
+	@Produces(MediaType.APPLICATION_JSON)
 	public String executeSelectQuery(@PathParam("slow") boolean flag) {
 
 		queryString = "select state, sum(pop) from zips group by state;";
 		slowQueryString = "select * from zips where upper(city) = 'SPRINGFIELD';";
 		if (flag) {
-			return_value = executeQuery(slowQueryString);
+			result = processQuery(slowQueryString);
 		} else {
-			return_value = executeQuery(queryString);
+			result = processQuery(queryString);
 		}
-		return "<html> " + "<title>" + "Hello Jersey" + "</title>"
-				+ "<body><h1>" + "The number of rows retrieved is: "
-				+ return_value + "</h1></body>" + "</html> ";
+		return result.toString();
 	}
 
 	@GET
 	@Path("/join/{slow}")
-	@Produces(MediaType.TEXT_HTML)
+	@Produces(MediaType.APPLICATION_JSON)
 	public String executeCartesianQuery(@PathParam("slow") boolean flag) {
 
 		queryString = "select c.name, cl.language from country c, countrylanguage cl "
@@ -69,34 +51,30 @@ public class StatementExecutor {
 		slowQueryString = "select c.name, cl.language from country c, countrylanguage cl where c.name = 'Spain';";
 		// checks if the slow query flag is set and
 		if (flag) {
-			return_value = executeQuery(slowQueryString);
-			
+			result = processQuery(slowQueryString);
+
 		} else {
-			return_value = executeQuery(queryString);
+			result = processQuery(queryString);
 		}
-		return "<html> " + "<title>" + "Executed join query" + "</title>"
-				+ "<body><h1>" + "The number of rows retrieved is: "
-				+ return_value + "</h1></body>" + "</html> ";
+		return result.toString();
 	}
 
 	@GET
 	@Path("/inclause/{slow}")
-	@Produces(MediaType.TEXT_HTML)
+	@Produces(MediaType.APPLICATION_JSON)
 	public String executeInClauseQuery(@PathParam("slow") boolean flag) {
 
 		queryString = "select c.name, cl.language from country c, countrylanguage cl "
 				+ "where c.code = cl.countrycode and cl.language in ('Spanish', 'Portuguese');";
 
-		return_value = executeQuery(queryString);
-
-		return "<html> " + "<title>" + "Executed in clause query" + "</title>"
-				+ "<body><h1>" + "The number of rows retrieved is: "
-				+ return_value + "</h1></body>" + "</html> ";
+		result = processQuery(queryString);
+		logger.info(result.toString());
+		return result.toString();
 	}
 
 	@GET
 	@Path("/simplesubquery/{slow}")
-	@Produces(MediaType.TEXT_HTML)
+	@Produces(MediaType.APPLICATION_JSON)
 	public String executeSimpleSubquery(@PathParam("slow") boolean flag) {
 
 		queryString = "select * from city where countrycode in "
@@ -113,48 +91,47 @@ public class StatementExecutor {
 				+ "as subQ order by city_pop desc;";
 
 		if (flag) {
-			return_value = executeQuery(queryString);
+			result = processQuery(queryString);
 		} else {
-			return_value = executeQuery(slowQueryString);
+			result = processQuery(slowQueryString);
 		}
-		return "<html> " + "<title>" + "Executed simple subquery" + "</title>"
-				+ "<body><h1>" + "The number of rows retrieved is: "
-				+ return_value + "</h1></body>" + "</html> ";
+		return result.toString();
 	}
 
 	@GET
 	@Path("/indexrange/{slow}")
-	@Produces(MediaType.TEXT_HTML)
+	@Produces(MediaType.APPLICATION_JSON)
 	public String executeIndexRangeQuery(@PathParam("slow") boolean flag) {
 
 		queryString = "select distinct state from zips where lng between -70 ad -65;";
 		slowQueryString = "select distinct state from zips where lng between -170 and -65;";
 
 		if (flag) {
-			return_value = executeQuery(slowQueryString);
+			result = processQuery(slowQueryString);
 		} else {
-			return_value = executeQuery(queryString);
+			result = processQuery(queryString);
 		}
 
-		return "<html> " + "<title>" + "Executed index range query"
-				+ "</title>" + "<body><h1>"
-				+ "The number of rows retrieved is: " + return_value
-				+ "</h1></body>" + "</html> ";
+		return result.toString();
 	}
 
-	protected Integer executeQuery(String query) {
+	protected JSONArray processQuery(String query) {
 		Connection conn = null;
 		ResultSet rs = null;
-		Integer rsLength = 10;
+		Integer rsLength = 0;
+		JSONArray parsedArray = null;
+		ResultSetParser rsParser = new ResultSetParser();
 		try {
 			// create connection with database
 			controller.setDBProperties("mysql");
-			
+
 			conn = controller.establishConnection();
 			// creates statement with the open connection
 			stmt = conn.createStatement();
 			// get the result set of the executed query
 			rs = stmt.executeQuery(query);
+			parsedArray = rsParser.convertToJSON(rs);
+
 			// returns length of the result set.
 			boolean b = rs.last();
 			rsLength = 0;
@@ -165,6 +142,8 @@ public class StatementExecutor {
 			logger.info(rsLength.toString());
 
 		} catch (SQLException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
 			if (stmt != null) {
@@ -182,6 +161,6 @@ public class StatementExecutor {
 				}
 			}
 		}
-		return rsLength;
+		return parsedArray;
 	}
 }
