@@ -18,8 +18,10 @@
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 
+
 	<servlet-mapping>
 		<servlet-name>StatementExecutor</servlet-name>
 		<url-pattern>/query/*</url-pattern>
 	</servlet-mapping>
+	
 </web-app>

@@ -22,60 +22,65 @@ public class StatementExecutor {
 	JSONArray result;
 	String queryString = null;
 	String slowQueryString = null;
+	String db = null;
 	private static final Logger logger = LoggerFactory
 			.getLogger(StatementExecutor.class);
 	MainController controller = new MainController();
 
 	@GET
-	@Path("/population/{slow}")
+	@Path("/population/{slow}/{dbName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String executeSelectQuery(@PathParam("slow") boolean flag) {
+	public String executeSelectQuery(@PathParam("slow") boolean flag,
+			@PathParam("dbName") String dbName) {
 
 		queryString = "select state, sum(pop) from zips group by state;";
 		slowQueryString = "select * from zips where upper(city) = 'SPRINGFIELD';";
 		if (flag) {
-			result = processQuery(slowQueryString);
+			result = processQuery(slowQueryString, dbName);
 		} else {
-			result = processQuery(queryString);
+			result = processQuery(queryString, dbName);
 		}
 		return result.toString();
 	}
 
 	@GET
-	@Path("/join/{slow}")
+	@Path("/join/{slow}/{dbName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String executeCartesianQuery(@PathParam("slow") boolean flag) {
+	public String executeCartesianQuery(@PathParam("slow") boolean flag,
+			@PathParam("dbName") String dbName) {
 
 		queryString = "select c.name, cl.language from country c, countrylanguage cl "
 				+ "where c.code = cl.countrycode and c.name = 'Spain';";
 		slowQueryString = "select c.name, cl.language from country c, countrylanguage cl where c.name = 'Spain';";
 		// checks if the slow query flag is set and
 		if (flag) {
-			result = processQuery(slowQueryString);
+			result = processQuery(slowQueryString, dbName);
 
 		} else {
-			result = processQuery(queryString);
+			result = processQuery(queryString, dbName);
 		}
 		return result.toString();
 	}
 
 	@GET
-	@Path("/inclause/{slow}")
+	@Path("/inclause/{slow}/{dbName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String executeInClauseQuery(@PathParam("slow") boolean flag) {
+	public String executeInClauseQuery(@PathParam("slow") boolean flag,
+			@PathParam("dbName") String dbName) {
 
 		queryString = "select c.name, cl.language from country c, countrylanguage cl "
 				+ "where c.code = cl.countrycode and cl.language in ('Spanish', 'Portuguese');";
 
-		result = processQuery(queryString);
+		result = processQuery(queryString, dbName);
 		logger.info(result.toString());
 		return result.toString();
 	}
 
 	@GET
-	@Path("/simplesubquery/{slow}")
+	@Path("/simplesubquery/{slow}/{dbName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String executeSimpleSubquery(@PathParam("slow") boolean flag) {
+	public String executeSimpleSubquery(@PathParam("slow") boolean flag,
+			@PathParam("dbName") String dbName) {
 
 		queryString = "select * from city where countrycode in "
 				+ "(select code from country where gnp > 1350000) "
@@ -91,39 +96,41 @@ public class StatementExecutor {
 				+ "as subQ order by city_pop desc;";
 
 		if (flag) {
-			result = processQuery(queryString);
+			result = processQuery(queryString, dbName);
 		} else {
-			result = processQuery(slowQueryString);
+			result = processQuery(slowQueryString, dbName);
 		}
 		return result.toString();
 	}
 
 	@GET
-	@Path("/indexrange/{slow}")
+	@Path("/indexrange/{slow}/{dbName}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public String executeIndexRangeQuery(@PathParam("slow") boolean flag) {
+	public String executeIndexRangeQuery(@PathParam("slow") boolean flag,
+			@PathParam("dbName") String dbName) {
 
-		queryString = "select distinct state from zips where lng between -70 ad -65;";
+		queryString = "select distinct state from zips where lng between -70 and -65;";
 		slowQueryString = "select distinct state from zips where lng between -170 and -65;";
 
 		if (flag) {
-			result = processQuery(slowQueryString);
+			result = processQuery(slowQueryString, dbName);
 		} else {
-			result = processQuery(queryString);
+			result = processQuery(queryString, dbName);
 		}
 
 		return result.toString();
 	}
 
-	protected JSONArray processQuery(String query) {
+	protected JSONArray processQuery(String query, String dbName) {
 		Connection conn = null;
 		ResultSet rs = null;
 		Integer rsLength = 0;
 		JSONArray parsedArray = null;
+		this.db = dbName;
 		ResultSetParser rsParser = new ResultSetParser();
 		try {
 			// create connection with database
-			controller.setDBProperties("mysql");
+			controller.setDBProperties(db);
 
 			conn = controller.establishConnection();
 			// creates statement with the open connection
