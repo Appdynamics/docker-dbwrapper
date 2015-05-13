@@ -18,7 +18,6 @@ public class MainController {
 	InputStream input = null;
 	private String dbName, driver, dbUrl, username, password;
 	Connection conn = null;
-	String propFileName = "database.properties";
 
 	public void setDBProperties(String db) {
 
@@ -27,8 +26,8 @@ public class MainController {
 		case "oracle":
 			try {
 				this.driver = "com.jdbc.driver.OracleDriver";
-				this.dbUrl = "jdbc:oracle:thin:@oracle-db:1521:XE";
-				this.username = "sys as sysdba";
+				this.dbUrl = "jdbc:oracle:thin:@localdocker:1521:XE";
+				this.username = "system";
 				this.password = "oracle";
 			} finally {
 				if (input != null) {
@@ -44,9 +43,9 @@ public class MainController {
 			try {
 
 				this.driver = "com.mysql.jdbc.Driver";
-				this.dbUrl = "jdbc:mysql://localhost:3306/test";
+				this.dbUrl = "jdbc:mysql://ecommerce-worlddb:3306/test";
 				this.username = "root";
-				this.password = "";
+				this.password = "tiger";
 				logger.info(this.dbName + " " + this.dbUrl + " "
 						+ this.username + " " + this.password);
 
