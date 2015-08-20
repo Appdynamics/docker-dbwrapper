@@ -15,3 +15,8 @@
 log/
 target/
 build/
+
+# Gradle
+build/
+.gradle/
+gradle/
