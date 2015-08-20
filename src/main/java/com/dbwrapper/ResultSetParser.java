@@ -2,8 +2,9 @@ package com.dbwrapper;
 
 import java.sql.ResultSet;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONArray;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +20,7 @@ public class ResultSetParser {
 	 * @return a JSONArray
 	 * @throws Exception
 	 */
-	public JSONArray convertToJSON(ResultSet resultSet) throws Exception {
-
+	public JSONArray convertToJSON(ResultSet resultSet) throws Exception{
 		logger.info("the number of columns retrieved is: "
 				+ resultSet.getMetaData().getColumnCount());
 
@@ -29,8 +29,6 @@ public class ResultSetParser {
 		while (resultSet.next()) {
 
 			int total_rows = resultSet.getMetaData().getColumnCount();
-
-			logger.info("number of rows is: " + total_rows);
 
 			JSONObject obj = new JSONObject();
 
