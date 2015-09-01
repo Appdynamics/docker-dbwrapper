@@ -38,20 +38,26 @@ public class StatementExecutor {
 		logger.info("executing join query" + " " + flag + " " + dbName);
 		queryString = "select c.name, cl.language from world.country c, world.countrylanguage cl "
 				+ "where c.code = cl.countrycode and c.name = 'United States'";
-		slowQueryString = "select c.name, cl.language from world.country c, world.countrylanguage cl where c.name = 'United States'";
+		slowQueryString = "select c.name, c.capital cl.language, cl.percentage, cu.customerid, "
+				+ "cu.address from world.country c, world.countrylanguage cl, world.customers cu where c.name = 'United States'";
+
 		// checks if the slow query flag is set and
 		if (flag) {
+
 			startTime = System.currentTimeMillis();
 			result = processQuery(slowQueryString, dbName);
 			endTime = System.currentTimeMillis();
 			responseTime = endTime - startTime;
 			logger.info("The response time is: " +responseTime);
+
 		} else {
+
 			startTime = System.currentTimeMillis();
 			result = processQuery(queryString, dbName);
 			endTime = System.currentTimeMillis();
 			responseTime = endTime - startTime;
 			logger.info("The response time is: " +responseTime);
+
 		}
 		return result.toString();
 	}
@@ -62,7 +68,7 @@ public class StatementExecutor {
 		Connection conn = null;
 		ResultSet rs = null;
 		Integer rsLength = 0;
-		JSONArray parsedArray = null;
+		JSONArray parsedResultSet = null;
 		this.db = dbName;
 		ResultSetParser rsParser = new ResultSetParser();
 		try {
@@ -79,7 +85,7 @@ public class StatementExecutor {
 			rs = stmt.executeQuery(query);
 			
 			//return the result set in JSON format
-			parsedArray = rsParser.convertToJSON(rs);
+			parsedResultSet = rsParser.convertToJSON(rs);
 
 		} catch (SQLException e) {
 			logger.error("Sorry, an exception has occurred", e);
@@ -101,6 +107,6 @@ public class StatementExecutor {
 				}
 			}
 		}
-		return parsedArray;
+		return parsedResultSet;
 	}
 }
