@@ -38,7 +38,7 @@ public class StatementExecutor {
 		logger.info("executing join query" + " " + flag + " " + dbName);
 		queryString = "select c.name, cl.language from world.country c, world.countrylanguage cl "
 				+ "where c.code = cl.countrycode and c.name = 'United States'";
-		slowQueryString = "select c.name, c.capital cl.language, cl.percentage, cu.customerid, "
+		slowQueryString = "select c.name, c.capital, cl.language, cl.percentage, cu.customerid, "
 				+ "cu.address from world.country c, world.countrylanguage cl, world.customers cu where c.name = 'United States'";
 
 		// checks if the slow query flag is set and
