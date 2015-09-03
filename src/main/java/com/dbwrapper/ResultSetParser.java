@@ -28,11 +28,11 @@ public class ResultSetParser {
 		logger.info("the resultset contains values: " + resultSet.next());
 		while (resultSet.next()) {
 
-			int total_rows = resultSet.getMetaData().getColumnCount();
+			int columns = resultSet.getMetaData().getColumnCount();
 
 			JSONObject obj = new JSONObject();
 
-			for (int i = 0; i < total_rows; i++) {
+			for (int i = 0; i < columns; i++) {
 				obj.put(resultSet.getMetaData().getColumnLabel(i + 1)
 						.toLowerCase(), resultSet.getObject(i + 1));
 				logger.info(obj.toString());

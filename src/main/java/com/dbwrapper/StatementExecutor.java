@@ -72,6 +72,10 @@ public class StatementExecutor {
 		JSONArray parsedResultSet = null;
 		this.db = dbName;
 		ResultSetParser rsParser = new ResultSetParser();
+
+		int numberOfColumns = 0;
+
+
 		try {
 			// set the database properties.
 			controller.setDBProperties(db);
@@ -84,9 +88,25 @@ public class StatementExecutor {
 			
 			// get the result set of the executed query
 			rs = stmt.executeQuery(query);
+
+			numberOfColumns = rs.getMetaData().getColumnCount();
+
+			for (int i = 1; i <= numberOfColumns; i++) {
+				if (i > 1) System.out.print(",  ");
+				String columnName = rs.getMetaData().getColumnName(i);
+				logger.info(columnName);
+			}
+
+			while (rs.next()) {
+				for (int i = 1; i <= numberOfColumns; i++) {
+					if (i > 1) System.out.print(",  ");
+					String columnValue = rs.getString(i);
+					logger.info(columnValue);
+				}
+			}
 			
 			//return the result set in JSON format
-			parsedResultSet = rsParser.convertToJSON(rs);
+			//parsedResultSet = rsParser.convertToJSON(rs);
 
 		} catch (SQLException e) {
 			logger.error("Sorry, an exception has occurred", e);
