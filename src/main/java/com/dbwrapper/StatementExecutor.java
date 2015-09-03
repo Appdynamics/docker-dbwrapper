@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 public class StatementExecutor {
 
 	Statement stmt = null;
-	JSONArray result;
 	String queryString = null;
 	String slowQueryString = null;
 	String db = null;
@@ -45,7 +44,7 @@ public class StatementExecutor {
 		if (flag) {
 
 			startTime = System.currentTimeMillis();
-			result = processQuery(slowQueryString, dbName);
+			processQuery(slowQueryString, dbName);
 			endTime = System.currentTimeMillis();
 			responseTime = endTime - startTime;
 			logger.info("The response time is: " +responseTime);
@@ -53,19 +52,18 @@ public class StatementExecutor {
 		} else {
 
 			startTime = System.currentTimeMillis();
-			result = processQuery(queryString, dbName);
+			processQuery(queryString, dbName);
 			endTime = System.currentTimeMillis();
 			responseTime = endTime - startTime;
 			logger.info("The response time is: " +responseTime);
 
 		}
-		logger.info(result.toString());
 		return "Success";
 	}
 
 
 
-	protected JSONArray processQuery(String query, String dbName) {
+	protected void processQuery(String query, String dbName) {
 		Connection conn = null;
 		ResultSet rs = null;
 		Integer rsLength = 0;
@@ -128,6 +126,5 @@ public class StatementExecutor {
 				}
 			}
 		}
-		return parsedResultSet;
 	}
 }
